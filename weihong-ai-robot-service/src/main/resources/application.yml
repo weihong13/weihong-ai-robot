@@ -4,7 +4,7 @@ server:
 spring:
   ai:
     deepseek:
-      api-key: sk-19e5dfaac7f941368f84ae58701f2b76 # 填写 DeepSeek Api Key, 改成你自己的
+      api-key: sk-1111111 # 填写 DeepSeek Api Key, 改成你自己的
       base-url: https://api.deepseek.com # DeepSeek 的请求 URL, 可不填，默认值为 api.deepseek.com
       chat:
         options:
