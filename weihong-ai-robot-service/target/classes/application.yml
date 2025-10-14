@@ -8,6 +8,10 @@ spring:
       base-url: https://api.deepseek.com # DeepSeek 的请求 URL, 可不填，默认值为 api.deepseek.com
       chat:
         options:
-#          model: deepseek-chat # 使用哪个模型 chat V3
-          model: deepseek-reasoner # 使用哪个模型 R1
+          model: deepseek-chat # 使用哪个模型 chat V3
+#          model: deepseek-reasoner # 使用哪个模型 R1
           temperature: 0.8 # 温度值
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor: debug
