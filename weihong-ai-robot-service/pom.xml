@@ -68,6 +68,11 @@
             <version>${commons-lang3.version}</version>
         </dependency>
 
+        <!-- Ollama -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
+        </dependency>
 
     </dependencies>
 

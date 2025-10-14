@@ -12,6 +12,12 @@ spring:
 #          model: deepseek-reasoner # 使用哪个模型 R1
           temperature: 0.8 # 温度值
 
+    ollama:
+      base-url: http://localhost:11434 # Ollama 服务的访问地址, 11434 端口是 Ollama 默认的启动端口
+      chat:
+        options: # 模型参数
+          model: qwen3:1.7b # 指定 Ollama 使用的大模型名称，根据你实际安装的来，我运行的是 14.7
+          temperature: 0.7 # 温度值
 logging:
   level:
     org.springframework.ai.chat.client.advisor: debug
