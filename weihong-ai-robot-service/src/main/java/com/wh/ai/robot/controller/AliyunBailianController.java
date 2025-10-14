@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import com.quanxiaoha.ai.robot.model.AIResponse;
 
 import java.util.Objects;
 
@@ -44,7 +45,7 @@ public class AliyunBailianController {
      * @return
      */
     @GetMapping(value = "/generateStream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> generateStream(@RequestParam(value = "message", defaultValue = "你是谁？") String message) {
+    public Flux<AIResponse> generateStream(@RequestParam(value = "message", defaultValue = "你是谁？") String message) {
         // 构建提示词
         Prompt prompt = new Prompt(new UserMessage(message));
 
@@ -52,7 +53,8 @@ public class AliyunBailianController {
         return chatModel.stream(prompt)
                 .mapNotNull(chatResponse -> {
                     Generation generation = chatResponse.getResult();
-                    return Objects.nonNull(generation) ? generation.getOutput().getText() : null;
+                    String text = generation.getOutput().getText();
+                    return AIResponse.builder().v(text).build();
                 });
 
     }

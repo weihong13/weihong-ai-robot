@@ -20,15 +20,15 @@
                 </div>
               </div>
               <!-- 回复的内容 -->
-              <div class="p-1 max-w-[80%] mb-2">
-                <p>{{ chat.content }}</p>
+              <div class="p-1 mb-2 max-w-[90%]">
+                <StreamMarkdownRender :content="chat.content" />
               </div>
             </div>
           </template>
       </div>
   
       <!-- 提问输入框 -->
-      <div class="sticky max-w-3xl mx-auto bg-white bottom-0 left-0 w-full mb-5">
+      <div class="sticky max-w-3xl mx-auto bg-white bottom-0 left-0 w-full">
         <div class="bg-gray-100 rounded-3xl px-4 py-3 mx-4 border border-gray-200 flex flex-col">
           <textarea 
             v-model="message" 
@@ -55,7 +55,7 @@
           </div>
         </div>
         <!-- 提示文字 -->
-        <div class="flex items-center justify-center text-xs text-gray-400 mt-2">内容由 AI 生成，请仔细甄别</div>
+        <div class="flex items-center justify-center text-xs text-gray-400 mt-2 mb-2">内容由 AI 生成，请仔细甄别</div>
       </div>
     </div>
   </template>
@@ -63,6 +63,7 @@
   <script setup>
   import { ref, onBeforeUnmount, nextTick } from 'vue';
   import SvgIcon from '@/components/SvgIcon.vue'
+  import StreamMarkdownRender from '@/components/StreamMarkdownRender.vue'
   
   // 输入的消息
   const message = ref('')
@@ -124,10 +125,12 @@
   
       // 处理消息事件
       eventSource.onmessage = (event) => {
-        console.log('接收到数据: ', event.data)
+        console.log('接收到数据: ' + event.data + '---')
         if (event.data) { // 若响应数据不为空
+          // 解析 JSON
+          let response = JSON.parse(event.data)
           // 持续追加流式回答
-          responseText += event.data
+          responseText += response.v
           
           // 更新最后一条消息
           chatList.value[chatList.value.length - 1].content = responseText
