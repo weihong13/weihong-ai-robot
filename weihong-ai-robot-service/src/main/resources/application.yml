@@ -4,7 +4,7 @@ server:
 spring:
   ai:
     deepseek:
-      api-key: sk-19e5dfaac7f941368f84ae58701f2b76 # 填写 DeepSeek Api Key, 改成你自己的
+      api-key: sk-1111 # 填写 DeepSeek Api Key, 改成你自己的
       base-url: https://api.deepseek.com # DeepSeek 的请求 URL, 可不填，默认值为 api.deepseek.com
       chat:
         options:
@@ -18,6 +18,26 @@ spring:
         options: # 模型参数
           model: qwen3:1.7b # 指定 Ollama 使用的大模型名称，根据你实际安装的来，我运行的是 14.7
           temperature: 0.7 # 温度值
+    zhipuai:
+      base-url: https://open.bigmodel.cn/api/paas # 智谱 AI 的请求 URL, 可不填，默认值为 open.bigmodel.cn/api/paas
+      api-key: 111.111 # 填写智谱 AI 的 API Key, 该成你自己的
+      chat:
+        options: # 模型参数
+          model: glm-4-air # 模型名称，使用智谱 AI 哪个模型
+          temperature: 0.7 # 温度值
+    openai:
+#      base-url: https://api.zhizengzeng.com/v1 # OpenAI 服务的访问地址
+#      api-key: sk-111  # 填写智增增的 API Key, 该成你自己的
+
+      base-url: https://dashscope.aliyuncs.com/compatible-mode # OpenAI 服务的访问地址，这里使用的是阿里云百炼
+      api-key: sk-111  # 填写智增增的 API Key, 该成你自己的
+
+      chat:
+        options:
+#          model: gpt-4o # 模型名称
+          model: qwen-turbo # 模型名称
+          temperature: 0.7 # 温度值
+
 logging:
   level:
     org.springframework.ai.chat.client.advisor: debug
