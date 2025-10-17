@@ -1,5 +1,7 @@
 package com.wh.ai.robot.controller;
 
+import com.wh.ai.robot.tools.DateTimeTools;
+import com.wh.ai.robot.tools.WeatherTools;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -32,6 +34,7 @@ public class ChatClientController {
     public String generate(@RequestParam(value = "message", defaultValue = "你是谁？") String message) {
         // 一次性返回结果
         return chatClient.prompt()
+                .tools(new DateTimeTools())
                 .user(message)
                 .call()
                 .content();
@@ -44,10 +47,13 @@ public class ChatClientController {
      */
     @GetMapping(value = "/generateStream", produces = "text/html;charset=utf-8")
     public Flux<String> generateStream(@RequestParam(value = "message", defaultValue = "你是谁？") String message,
-                                       @RequestParam(value = "chatId") String chatId) {
+                                       @RequestParam(value = "chatId") String chatId
+    ) {
 
         // 流式输出
         return chatClient.prompt()
+                .tools(new DateTimeTools(), new WeatherTools()) // Function Call
+//                .system("请你扮演一名犬小哈 Java 项目实战专栏的客服人员")
                 .user(message) // 提示词
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
