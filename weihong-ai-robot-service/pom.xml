@@ -106,6 +106,12 @@
             </exclusions>
         </dependency>
 
+        <!-- MCP Client -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>
+        </dependency>
+
         <!-- 统一 JSON Schema 相关依赖版本 -->
         <dependency>
             <groupId>com.github.victools</groupId>
