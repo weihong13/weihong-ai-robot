@@ -1,5 +1,5 @@
 server:
-  port: 9000 # 项目启动端口
+  port: 8080 # 项目启动端口
 
 spring:
   cassandra:
@@ -7,6 +7,20 @@ spring:
     port: 9042 # 端口号
     local-datacenter: datacenter1 # 必须与集群配置的数据中心名称一致（大小写敏感）
   ai:
+    mcp:
+      client:
+        type: sync # 客户端使用同步通信模式
+        request-timeout: 20s # 设置单次请求超时时间
+        sse: # SSE (Server-Sent Events) 流式响应配置
+          connections: # 定义 SSE 连接端点
+            qq-mcp-server: # 自定义连接名称（可任意命名）
+              url: http://localhost:8000 # MCP 服务实际地址
+#    mcp:
+#      client:
+#        stdio:
+#          servers-configuration: classpath:/mcp-servers-config.json # 指定 MCP 服务的配置文件路径
+#        toolcallback:
+#          enabled: true # 开启 MCP 客户端的工具回调（Tool Callback）功能
     chat:
       memory:
         repository:
@@ -47,7 +61,8 @@ spring:
       chat:
         options:
 #          model: gpt-4o # 模型名称
-          model: qwen-turbo # 模型名称
+#          model: qwen-turbo # 模型名称
+          model: qwen-omni-turbo # 模型名称 全模态模型
           temperature: 0.7 # 温度值
 
 logging:

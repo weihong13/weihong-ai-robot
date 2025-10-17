@@ -38,7 +38,7 @@ public class McpChatClientController {
         // 流式输出
         return chatClient.prompt()
                 .user(message) // 提示词
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+//                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
                 .chatResponse()
                 .mapNotNull(chatResponse -> {
