@@ -1,0 +1,20 @@
+server:
+  port: 8090 # 项目启动端口
+
+spring:
+  data:
+    redis:
+      host: localhost # Redis URL 链接
+      port: 6379 # Redis 端口
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode # OpenAI 服务的访问地址，这里使用的是阿里云百炼
+      api-key: sk-11111  # 填写阿里百炼的 API Key, 改成你自己的
+      embedding:
+        options:
+          model: text-embedding-v4 # 向量模型
+    vectorstore:
+      redis:
+        initialize-schema: true # 是否初始化模式
+        index-name: xiaohong-ai-index # 自定义索引名称
+        prefix: embedding # 自定义键名前缀
