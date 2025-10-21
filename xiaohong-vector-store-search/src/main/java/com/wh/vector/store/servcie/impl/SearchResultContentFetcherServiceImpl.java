@@ -2,11 +2,13 @@ package com.wh.vector.store.servcie.impl;
 
 import com.wh.vector.store.model.SearchResult;
 import com.wh.vector.store.servcie.SearchResultContentFetcherService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jsoup.Jsoup;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * @Author: 犬小哈
- * @Date: 2025/7/30 12:15
+ * @Author: GHW
+ * @Date: 2025/10/21 10:35
  * @Version: v1.0.0
  * @Description: 页面内容提取
  **/
@@ -58,7 +60,18 @@ public class SearchResultContentFetcherServiceImpl implements SearchResultConten
         // 步骤3：当所有任务完成后收集结果
         return allFutures.thenApplyAsync(v -> // 所有任务完成后触发
                         futures.stream() // 遍历所有已完成的任务
-                                .map(CompletableFuture::join) // 提取每个任务的结果
+                                .map(future -> {
+                                    SearchResult searchResult = future.join();
+                                    // 获取页面 HTML 代码
+                                    String html = searchResult.getContent();
+
+                                    if (StringUtils.isNotBlank(html)) {
+                                        // 提取 HTML 中的文本
+                                        searchResult.setContent(Jsoup.parse(html).text());
+                                    }
+
+                                    return searchResult;
+                                }) // 提取每个任务的结果
                                 .collect(Collectors.toList()), // 合并所有结果为一个集合，并返回
                 processingExecutor // 使用专用的 processingExecutor 线程池
         );
