@@ -1,13 +1,16 @@
 package com.wh.vector.store.controller;
 
+import com.wh.vector.store.advisor.NetworkSearchAdvisor;
 import com.wh.vector.store.model.SearchResult;
 import com.wh.vector.store.servcie.SearXNGService;
 import com.wh.vector.store.servcie.SearchResultContentFetcherService;
 import jakarta.annotation.Resource;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -26,9 +29,11 @@ public class NetworkSearchController {
 
     @Resource
     private SearXNGService searXNGService;
-
     @Resource
     private SearchResultContentFetcherService searchResultContentFetcherService;
+    @Resource
+    private ChatClient chatClient;
+
 
     /**
      * 测试
@@ -61,6 +66,23 @@ public class NetworkSearchController {
         // TODO 后续处理
 
         return searchResultList;
+    }
+
+
+    /**
+     * 流式对话
+     * @param message
+     * @return
+     */
+    @GetMapping(value = "/chat", produces = "text/html;charset=utf-8")
+    public Flux<String> chat(@RequestParam(value = "message") String message) {
+
+        // 流式输出
+        return chatClient.prompt()
+                .user(message) // 提示词
+                .advisors(new NetworkSearchAdvisor(searXNGService, searchResultContentFetcherService)) // 使用自定义的联网搜索 Advisor
+                .stream()
+                .content();
     }
 
 }
