@@ -1,0 +1,8 @@
+server:
+  port: 8080 # 项目启动端口
+
+spring:
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode # OpenAI 服务的访问地址，这里使用的是阿里云百炼
+      api-key: sk-e935d90ace984a9483f1e7045638850a  # 填写智增增的 API Key, 该成你自己的
