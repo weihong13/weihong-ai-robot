@@ -20,6 +20,7 @@ public class ChatController {
     @PostMapping("/new")
     @ApiOperationLog(description = "新建对话")
     public Response<?> newChat() {
+        int i = 1/0;
         return Response.success();
     }
 
