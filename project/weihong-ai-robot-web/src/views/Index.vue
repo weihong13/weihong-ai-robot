@@ -2,7 +2,7 @@
   <Layout>
     <!-- 主内容区域 -->
     <template #main-content>
-      <div class="flex items-center justify-center flex-1">
+      <div class="flex items-center justify-center flex-1 relative">
         <div class="max-w-3xl w-full">
           <div class="text-center mb-10">
             <div class="flex items-center justify-center mb-3">
@@ -11,26 +11,13 @@
             </div>
             <p class="text-gray-500">我可以帮你写代码、写作各种创意内容，请把你的任务交给我吧~</p>
           </div>
-          <div class="bg-gray-100 rounded-3xl px-4 py-3 mx-4 border border-gray-200 flex flex-col">
-                  <textarea 
-                    v-model="message" 
-                    placeholder="给小宏 AI 机器人发送消息"
-                    class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" 
-                    rows="2"
-                    ref="textareaRef"
-                    >
-                  </textarea>
 
-                  <!-- 发送按钮 -->
-                  <div class="flex justify-end mt-3">
-                    <button 
-                    class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors
-                    disabled:opacity-50
-                    disabled:cursor-not-allowed">
-                        <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
-                    </button>
-                  </div>
-          </div>
+          <!-- 聊天输入框 -->
+          <ChatInputBox
+          v-model="userMessage"
+          @sendMessage="sendMessage"
+          />
+
         </div>
       </div>
     </template>
@@ -39,6 +26,36 @@
 
 
 <script setup>
+import { ref, watch } from 'vue'
 import Layout from '@/layouts/Layout.vue'
 import SvgIcon from '@/components/SvgIcon.vue'
+import ChatInputBox from '@/components/ChatInputBox.vue'
+import { newChat } from '@/api/chat'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 用户输入的消息
+const userMessage = ref('')
+
+watch(userMessage, (newText) => {
+  console.log(`子组件传递的新值: ${newText}`)
+})
+
+// 发送消息 - 跳转到对话聊天页并发送消息
+const sendMessage = () => {
+  if (!userMessage.value.trim()) return;
+  
+  console.log('用户发送的消息: ' + userMessage.value)
+
+  // 请求对话新建接口
+  newChat(userMessage.value).then(res => {
+    if (res.data.success) {
+        // 跳转到聊天对话页面
+        router.push({
+          path: '/chat/' + res.data.data.uuid
+        });
+    }
+  })
+}
 </script>

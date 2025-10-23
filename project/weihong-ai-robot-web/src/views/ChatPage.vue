@@ -1,69 +1,75 @@
 <template>
-    <div class="h-screen flex flex-col overflow-y-auto" ref="chatContainer">
-      <!-- 聊天记录区域 -->
-      <div class="flex-1 max-w-3xl mx-auto pb-24 pt-4 px-4">
-          <!-- 遍历聊天记录 -->
-          <template v-for="(chat, index) in chatList" :key="index">
-            <!-- 用户提问消息（靠右） -->
-            <div v-if="chat.role === 'user'" class="flex justify-end mb-4">
-              <div class="quesiton-container">
-                <p>{{ chat.content }}</p>
-              </div>
+    <Layout>
+      <!-- 主内容区域 -->
+      <template #main-content>
+        <div class="h-screen flex flex-col overflow-y-auto" ref="chatContainer">
+            <!-- 聊天记录区域 -->
+            <div class="flex-1 max-w-3xl mx-auto pb-24 pt-4 px-4">
+                <!-- 遍历聊天记录 -->
+                <template v-for="(chat, index) in chatList" :key="index">
+                  <!-- 用户提问消息（靠右） -->
+                  <div v-if="chat.role === 'user'" class="flex justify-end mb-4">
+                    <div class="quesiton-container">
+                      <p>{{ chat.content }}</p>
+                    </div>
+                  </div>
+  
+                  <!-- 大模型回复消息（靠左） -->
+                  <div v-else class="flex mb-4">
+                    <!-- 头像 -->
+                    <div class="flex-shrink-0 mr-3">
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center border border-gray-200">
+                        <SvgIcon name="deepseek-logo" customCss="w-5 h-5"></SvgIcon>
+                      </div>
+                    </div>
+                    <!-- 回复的内容 -->
+                    <div class="p-1 mb-2 max-w-[90%]">
+                      <StreamMarkdownRender :content="chat.content" />
+                    </div>
+                  </div>
+                </template>
             </div>
   
-            <!-- 大模型回复消息（靠左） -->
-            <div v-else class="flex mb-4">
-              <!-- 头像 -->
-              <div class="flex-shrink-0 mr-3">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center border border-gray-200">
-                  <SvgIcon name="deepseek-logo" customCss="w-5 h-5"></SvgIcon>
+            <!-- 提问输入框 -->
+            <div class="sticky max-w-3xl mx-auto bg-white bottom-0 left-0 w-full">
+              <div class="bg-gray-100 rounded-3xl px-4 py-3 mx-4 border border-gray-200 flex flex-col">
+                <textarea 
+                  v-model="message" 
+                  placeholder="给小宏 AI 机器人发送消息"
+                  class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" 
+                  rows="2"
+                  @input="autoResize"
+                  @keydown.enter.prevent="sendMessage"
+                  ref="textareaRef"
+                  >
+                </textarea>
+  
+                <!-- 发送按钮 -->
+                <div class="flex justify-end mt-3">
+                  <button 
+                  @click="sendMessage"
+                  :disabled="!message.trim()"
+                  class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                  ">
+                    <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
+                  </button>
                 </div>
               </div>
-              <!-- 回复的内容 -->
-              <div class="p-1 mb-2 max-w-[90%]">
-                <StreamMarkdownRender :content="chat.content" />
-              </div>
+              <!-- 提示文字 -->
+              <div class="flex items-center justify-center text-xs text-gray-400 mt-2 mb-2">内容由 AI 生成，请仔细甄别</div>
             </div>
-          </template>
-      </div>
-  
-      <!-- 提问输入框 -->
-      <div class="sticky max-w-3xl mx-auto bg-white bottom-0 left-0 w-full">
-        <div class="bg-gray-100 rounded-3xl px-4 py-3 mx-4 border border-gray-200 flex flex-col">
-          <textarea 
-            v-model="message" 
-            placeholder="给 AI 机器人发送消息"
-            class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" 
-            rows="2"
-            @input="autoResize"
-            @keydown.enter.prevent="sendMessage"
-            ref="textareaRef"
-            >
-          </textarea>
-  
-          <!-- 发送按钮 -->
-          <div class="flex justify-end mt-3">
-            <button 
-            @click="sendMessage"
-            :disabled="!message.trim()"
-            class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors
-            disabled:opacity-50
-            disabled:cursor-not-allowed
-            ">
-              <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
-            </button>
-          </div>
         </div>
-        <!-- 提示文字 -->
-        <div class="flex items-center justify-center text-xs text-gray-400 mt-2 mb-2">内容由 AI 生成，请仔细甄别</div>
-      </div>
-    </div>
+      </template>
+    </Layout>  
   </template>
   
   <script setup>
   import { ref, onBeforeUnmount, nextTick } from 'vue';
   import SvgIcon from '@/components/SvgIcon.vue'
   import StreamMarkdownRender from '@/components/StreamMarkdownRender.vue'
+  import Layout from '@/layouts/Layout.vue'
   
   // 输入的消息
   const message = ref('')
@@ -75,7 +81,7 @@
   
   // 聊天记录 (给个默认的问候语)
   const chatList = ref([
-    { role: 'assistant', content: '我是智能 AI 助手！✨ 我可以帮你解答各种问题，无论是学习、工作，还是日常生活中的小困惑，都可以找我聊聊。有什么我可以帮你的吗？😊' }
+    { role: 'assistant', content: '我是小宏智能 AI 助手！✨ 我可以帮你解答各种问题，无论是学习、工作，还是日常生活中的小困惑，都可以找我聊聊。有什么我可以帮你的吗？😊' }
   ])
   
   // 自动调整文本域高度
@@ -118,9 +124,9 @@
     chatList.value.push({ role: 'assistant', content: '' })
   
     try {
-         // 建立 SSE 连接
-        eventSource = new EventSource(`http://localhost:8080/mcp/ai/generateStream?message=${encodeURIComponent(userMessage)}&chatId=5`)
-        // 响应的回答
+      // 建立 SSE 连接
+      eventSource = new EventSource(`http://localhost:8080/v6/ai/generateStream?message=${encodeURIComponent(userMessage)}`)
+      // 响应的回答
       let responseText = ''
   
       // 处理消息事件
