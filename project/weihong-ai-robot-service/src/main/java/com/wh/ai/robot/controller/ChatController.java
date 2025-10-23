@@ -4,12 +4,15 @@ package com.wh.ai.robot.controller;
 import com.google.common.collect.Lists;
 import com.wh.ai.robot.advisor.CustomChatMemoryAdvisor;
 import com.wh.ai.robot.advisor.CustomStreamLoggerAndMessage2DBAdvisor;
+import com.wh.ai.robot.advisor.NetworkSearchAdvisor;
 import com.wh.ai.robot.aspect.ApiOperationLog;
 import com.wh.ai.robot.domain.mapper.ChatMessageMapper;
 import com.wh.ai.robot.model.vo.chat.AIResponse;
 import com.wh.ai.robot.model.vo.chat.AiChatReqVO;
 import com.wh.ai.robot.model.vo.chat.NewChatReqVO;
 import com.wh.ai.robot.service.ChatService;
+import com.wh.ai.robot.service.SearXNGService;
+import com.wh.ai.robot.service.SearchResultContentFetcherService;
 import com.wh.ai.robot.utils.Response;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +53,11 @@ public class ChatController {
     @Resource
     private TransactionTemplate transactionTemplate;
 
+    @Resource
+    private SearXNGService searXNGService;
+    @Resource
+    private SearchResultContentFetcherService searchResultContentFetcherService;
+
     @Value("${spring.ai.openai.base-url}")
     private String baseUrl;
     @Value("${spring.ai.openai.api-key}")
@@ -75,6 +83,9 @@ public class ChatController {
         // 温度值
         Double temperature = aiChatReqVO.getTemperature();
 
+        // 是否开启联网搜索
+        boolean networkSearch = aiChatReqVO.getNetworkSearch();
+
         // 构建 ChatModel
         ChatModel chatModel = OpenAiChatModel.builder()
                 .openAiApi(OpenAiApi.builder()
@@ -94,6 +105,19 @@ public class ChatController {
 
         // Advisor 集合
         List<Advisor> advisors = Lists.newArrayList();
+
+        // 是否开启了联网搜索
+        if (networkSearch) {
+            advisors.add(new NetworkSearchAdvisor(searXNGService, searchResultContentFetcherService));
+        } else {
+            // 添加自定义对话记忆 Advisor（以最新的 50 条消息作为记忆）
+            advisors.add(new CustomChatMemoryAdvisor(chatMessageMapper, aiChatReqVO, 50));
+        }
+
+        // 添加自定义打印流式对话日志 Advisor
+        advisors.add(new CustomStreamLoggerAndMessage2DBAdvisor(chatMessageMapper, aiChatReqVO, transactionTemplate));
+
+
         // 添加自定义对话记忆 Advisor（以最新的 50 条消息作为记忆）
         advisors.add(new CustomChatMemoryAdvisor(chatMessageMapper, aiChatReqVO, 50));
         // 添加自定义打印流式对话日志 Advisor
