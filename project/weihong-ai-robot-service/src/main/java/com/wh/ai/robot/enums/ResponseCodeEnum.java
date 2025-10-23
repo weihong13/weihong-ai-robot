@@ -20,6 +20,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
 
 
     // ----------- 业务异常状态码 -----------
+    CHAT_NOT_EXISTED("20000", "此对话不存在"),
     // TODO 待填充
     ;
 

@@ -149,6 +149,12 @@ public class ChatController {
     public Response<?> renameChatSummary(@RequestBody @Validated RenameChatReqVO renameChatReqVO) {
         return chatService.renameChatSummary(renameChatReqVO);
     }
-    
+
+    @PostMapping("/delete")
+    @ApiOperationLog(description = "删除对话")
+    public Response<?> deleteChat(@RequestBody @Validated DeleteChatReqVO deleteChatReqVO) {
+        return chatService.deleteChat(deleteChatReqVO);
+    }
+
 }
 

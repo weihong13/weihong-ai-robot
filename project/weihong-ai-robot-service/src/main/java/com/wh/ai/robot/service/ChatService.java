@@ -39,6 +39,13 @@ public interface ChatService {
      */
     Response<?> renameChatSummary(RenameChatReqVO renameChatReqVO);
 
+    /**
+     * 删除对话
+     * @param deleteChatReqVO
+     * @return
+     */
+    Response<?> deleteChat(DeleteChatReqVO deleteChatReqVO);
+
 }
 
 

@@ -1,11 +1,14 @@
 package com.wh.ai.robot.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wh.ai.robot.domain.dos.ChatDO;
 import com.wh.ai.robot.domain.dos.ChatMessageDO;
 import com.wh.ai.robot.domain.mapper.ChatMapper;
 import com.wh.ai.robot.domain.mapper.ChatMessageMapper;
+import com.wh.ai.robot.enums.ResponseCodeEnum;
+import com.wh.ai.robot.exception.BizException;
 import com.wh.ai.robot.model.vo.chat.*;
 import com.wh.ai.robot.service.ChatService;
 import com.wh.ai.robot.utils.PageResponse;
@@ -14,6 +17,7 @@ import com.wh.ai.robot.utils.StringUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -156,6 +160,34 @@ public class ChatServiceImpl implements ChatService {
                 .id(chatId)
                 .summary(summary)
                 .build());
+
+        return Response.success();
+    }
+
+    /**
+     * 删除对话
+     *
+     * @param deleteChatReqVO
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Response<?> deleteChat(DeleteChatReqVO deleteChatReqVO) {
+        // 对话 UUID
+        String uuid = deleteChatReqVO.getUuid();
+
+        // 删除对话
+        int count = chatMapper.delete(Wrappers.<ChatDO>lambdaQuery()
+                .eq(ChatDO::getUuid, uuid));
+
+        // 如果删除操作影响的行数为 0，说明想要删除的对话不存在
+        if (count == 0) {
+            throw new BizException(ResponseCodeEnum.CHAT_NOT_EXISTED);
+        }
+
+        // 批量删除对话下的所有消息
+        chatMessageMapper.delete(Wrappers.<ChatMessageDO>lambdaQuery()
+                .eq(ChatMessageDO::getChatUuid, uuid));
 
         return Response.success();
     }
