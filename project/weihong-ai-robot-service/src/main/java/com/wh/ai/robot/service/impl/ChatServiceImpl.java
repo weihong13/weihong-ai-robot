@@ -137,5 +137,27 @@ public class ChatServiceImpl implements ChatService {
 
         return PageResponse.success(chatDOPage, vos);
     }
+
+    /**
+     * 重命名对话摘要
+     *
+     * @param renameChatReqVO
+     * @return
+     */
+    @Override
+    public Response<?> renameChatSummary(RenameChatReqVO renameChatReqVO) {
+        // 对话 ID
+        Long chatId = renameChatReqVO.getId();
+        // 摘要
+        String summary = renameChatReqVO.getSummary();
+
+        // 根据主键 ID 更新摘要
+        chatMapper.updateById(ChatDO.builder()
+                .id(chatId)
+                .summary(summary)
+                .build());
+
+        return Response.success();
+    }
 }
 

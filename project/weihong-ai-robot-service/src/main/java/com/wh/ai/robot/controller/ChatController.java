@@ -144,5 +144,11 @@ public class ChatController {
         return chatService.findChatHistoryPageList(findChatHistoryPageListReqVO);
     }
 
+    @PostMapping("/summary/rename")
+    @ApiOperationLog(description = "重命名对话摘要")
+    public Response<?> renameChatSummary(@RequestBody @Validated RenameChatReqVO renameChatReqVO) {
+        return chatService.renameChatSummary(renameChatReqVO);
+    }
+    
 }
 
