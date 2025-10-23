@@ -2,8 +2,9 @@ package com.wh.ai.robot.controller;
 
 
 import com.google.common.collect.Lists;
-import com.wh.ai.robot.advisor.CustomStreamLoggerAdvisor;
+import com.wh.ai.robot.advisor.CustomStreamLoggerAndMessage2DBAdvisor;
 import com.wh.ai.robot.aspect.ApiOperationLog;
+import com.wh.ai.robot.domain.mapper.ChatMessageMapper;
 import com.wh.ai.robot.model.vo.chat.AIResponse;
 import com.wh.ai.robot.model.vo.chat.AiChatReqVO;
 import com.wh.ai.robot.model.vo.chat.NewChatReqVO;
@@ -19,6 +20,7 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +44,10 @@ public class ChatController {
 
     @Resource
     private ChatService chatService;
+    @Resource
+    private ChatMessageMapper chatMessageMapper;
+    @Resource
+    private TransactionTemplate transactionTemplate;
 
     @Value("${spring.ai.openai.base-url}")
     private String baseUrl;
@@ -88,7 +94,7 @@ public class ChatController {
         // Advisor 集合
         List<Advisor> advisors = Lists.newArrayList();
         // 添加自定义打印流式对话日志 Advisor
-        advisors.add(new CustomStreamLoggerAdvisor());
+        advisors.add(new CustomStreamLoggerAndMessage2DBAdvisor(chatMessageMapper, aiChatReqVO, transactionTemplate));
 
         // 应用 Advisor 集合
         chatClientRequestSpec.advisors(advisors);
