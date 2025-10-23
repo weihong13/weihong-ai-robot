@@ -1,4 +1,4 @@
-package com.wh.ai.robot.model;
+package com.wh.ai.robot.model.vo.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
