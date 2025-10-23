@@ -6,14 +6,14 @@
         <!-- 侧边栏内容区域 -->
         <div class="p-0 h-full flex flex-col">
             <!-- Logo 与应用名称 -->
-            <div class="flex items-center justify-center p-4 cursor-pointer">
+            <div class="flex items-center justify-center p-4 cursor-pointer" @click="jumpToIndexPage">
               <SvgIcon name="ai-robot-logo" customCss="w-8 h-8 text-gray-700 mr-3" />
               <span class="text-2xl font-bold font-sans tracking-wide text-gray-800">小哈AI机器人</span>
             </div>
 
 
             <!-- 开启新对话按钮 -->
-            <button 
+            <button @click="jumpToIndexPage"
               class="mx-auto mb-[34px] my-2 px-6 py-2 text-white rounded-xl transition-colors new-chat-btn w-fit cursor-pointer">
               <SvgIcon name="new-chat" customCss="w-6 h-6 mr-1.5 inline text-[#4d6bfe]" />
               开启新对话
@@ -25,7 +25,15 @@
                 <div class="text-xs px-3 py-1 text-gray-500">历史对话</div>
                 <div v-for="(historyChat, index) in historyChats" :key="index" class="relative px-3 py-1 rounded-xl hover:bg-[rgb(239,246,255)] cursor-pointer transition-colors flex items-center justify-between"
                 @mouseenter="showButton = historyChat.uuid" @mouseleave="showButton = null">
-                    <p class="text-[14px] text-gray-800 overflow-hidden whitespace-nowrap">{{ historyChat.summary }}</p>
+
+                    <a-tooltip placement="top">
+                        <!-- Tooltip 提示文字 -->
+                        <template #title>
+                            <span>{{ historyChat.summary }}</span>
+                        </template>
+
+                        <p class="text-[14px] text-gray-800 overflow-hidden whitespace-nowrap">{{ historyChat.summary }}</p>
+                    </a-tooltip>
                     <!-- 下拉菜单 -->
                     <a-dropdown>
                          <template #overlay>
@@ -78,6 +86,14 @@
 import { ref } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { EditOutlined, EllipsisOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 跳转到首页
+const jumpToIndexPage = () => {
+  router.push('/')
+}
 
 // 定义 props, 对外部暴露配置项
 const props = defineProps({
@@ -94,7 +110,7 @@ const toggleSidebar = () => {
 
 // 历史对话
 const historyChats = ref([
-  {"uuid": "9640a419-4b0c-45dd-b16d-1980df2424c4", "summary": "新对话1"},
+  {"uuid": "9640a419-4b0c-45dd-b16d-1980df2424c4", "summary": "新对话1新对话1新对话1新对话1新对话1新对话1"},
   {"uuid": "7c2af48e-dce2-4822-aef6-c7a3c1949805", "summary": "新对话2"},
   {"uuid": "152496bc-2776-422d-ac96-5dbfc903bc1d", "summary": "新对话3"},
 ])
