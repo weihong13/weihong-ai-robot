@@ -27,6 +27,7 @@
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <!-- p6spy 组件 -->
         <p6spy.version>3.9.1</p6spy.version>
+        <guava.version>33.0.0-jre</guava.version>
     </properties>
 
     <!-- Spring AI 依赖管理   -->
@@ -130,6 +131,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- 相关工具类 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 
