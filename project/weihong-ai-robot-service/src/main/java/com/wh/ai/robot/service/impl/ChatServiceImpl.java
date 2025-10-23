@@ -6,10 +6,7 @@ import com.wh.ai.robot.domain.dos.ChatDO;
 import com.wh.ai.robot.domain.dos.ChatMessageDO;
 import com.wh.ai.robot.domain.mapper.ChatMapper;
 import com.wh.ai.robot.domain.mapper.ChatMessageMapper;
-import com.wh.ai.robot.model.vo.chat.FindChatHistoryMessagePageListReqVO;
-import com.wh.ai.robot.model.vo.chat.FindChatHistoryMessagePageListRspVO;
-import com.wh.ai.robot.model.vo.chat.NewChatReqVO;
-import com.wh.ai.robot.model.vo.chat.NewChatRspVO;
+import com.wh.ai.robot.model.vo.chat.*;
 import com.wh.ai.robot.service.ChatService;
 import com.wh.ai.robot.utils.PageResponse;
 import com.wh.ai.robot.utils.Response;
@@ -105,6 +102,40 @@ public class ChatServiceImpl implements ChatService {
         }
 
         return PageResponse.success(chatMessageDOPage, vos);
+    }
+
+    /**
+     * 查询历史对话
+     *
+     * @param findChatHistoryPageListReqVO
+     * @return
+     */
+    @Override
+    public PageResponse<FindChatHistoryPageListRspVO> findChatHistoryPageList(FindChatHistoryPageListReqVO findChatHistoryPageListReqVO) {
+        // 获取当前页、以及每页需要展示的数据数量
+        Long current = findChatHistoryPageListReqVO.getCurrent();
+        Long size = findChatHistoryPageListReqVO.getSize();
+
+        // 执行分页查询
+        Page<ChatDO> chatDOPage = chatMapper.selectPageList(current, size);
+
+        // 获取查询结果
+        List<ChatDO> chatDOS = chatDOPage.getRecords();
+
+        // DO 转 VO
+        List<FindChatHistoryPageListRspVO> vos = null;
+        if (CollUtil.isNotEmpty(chatDOS)) {
+            vos = chatDOS.stream()
+                    .map(chatDO -> FindChatHistoryPageListRspVO.builder() // 构建返参 VO
+                            .id(chatDO.getId())
+                            .uuid(chatDO.getUuid())
+                            .summary(chatDO.getSummary())
+                            .updateTime(chatDO.getUpdateTime())
+                            .build())
+                    .collect(Collectors.toList());
+        }
+
+        return PageResponse.success(chatDOPage, vos);
     }
 }
 

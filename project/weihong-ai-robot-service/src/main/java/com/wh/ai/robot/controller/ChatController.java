@@ -138,5 +138,11 @@ public class ChatController {
         return chatService.findChatHistoryMessagePageList(findChatHistoryMessagePageListReqVO);
     }
 
+    @PostMapping("/list")
+    @ApiOperationLog(description = "查询历史对话")
+    public PageResponse<FindChatHistoryPageListRspVO> findChatHistoryPageList(@RequestBody @Validated FindChatHistoryPageListReqVO findChatHistoryPageListReqVO) {
+        return chatService.findChatHistoryPageList(findChatHistoryPageListReqVO);
+    }
+
 }
 
