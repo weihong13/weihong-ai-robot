@@ -7,12 +7,11 @@ import com.wh.ai.robot.advisor.CustomStreamLoggerAndMessage2DBAdvisor;
 import com.wh.ai.robot.advisor.NetworkSearchAdvisor;
 import com.wh.ai.robot.aspect.ApiOperationLog;
 import com.wh.ai.robot.domain.mapper.ChatMessageMapper;
-import com.wh.ai.robot.model.vo.chat.AIResponse;
-import com.wh.ai.robot.model.vo.chat.AiChatReqVO;
-import com.wh.ai.robot.model.vo.chat.NewChatReqVO;
+import com.wh.ai.robot.model.vo.chat.*;
 import com.wh.ai.robot.service.ChatService;
 import com.wh.ai.robot.service.SearXNGService;
 import com.wh.ai.robot.service.SearchResultContentFetcherService;
+import com.wh.ai.robot.utils.PageResponse;
 import com.wh.ai.robot.utils.Response;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -131,6 +130,12 @@ public class ChatController {
                 .content()
                 .mapNotNull(text -> AIResponse.builder().v(text).build()); // 构建返参 AIResponse
 
+    }
+
+    @PostMapping("/message/list")
+    @ApiOperationLog(description = "查询对话历史消息")
+    public PageResponse<FindChatHistoryMessagePageListRspVO> findChatMessagePageList(@RequestBody @Validated FindChatHistoryMessagePageListReqVO findChatHistoryMessagePageListReqVO) {
+        return chatService.findChatHistoryMessagePageList(findChatHistoryMessagePageListReqVO);
     }
 
 }

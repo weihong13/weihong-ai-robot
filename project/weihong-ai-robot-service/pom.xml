@@ -30,6 +30,7 @@
         <guava.version>33.0.0-jre</guava.version>
         <okhttp.version>4.12.0</okhttp.version>
         <jsoup.version>1.17.2</jsoup.version>
+        <hutool.version>5.8.39</hutool.version>
     </properties>
 
     <!-- Spring AI 依赖管理   -->
@@ -156,6 +157,18 @@
             <version>${jsoup.version}</version>
         </dependency>
 
+        <!-- 分页插件 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+        </dependency>
+
+        <!-- Hutool -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
