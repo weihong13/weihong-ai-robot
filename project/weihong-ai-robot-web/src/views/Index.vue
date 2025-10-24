@@ -46,15 +46,23 @@ watch(userMessage, (newText) => {
 const sendMessage = () => {
   if (!userMessage.value.trim()) return;
   
-  console.log('用户发送的消息: ' + userMessage.value)
+  // 临时保存消息的值，因为子组件中的 userMessage 会被清空
+  const userMessageTemp = userMessage.value.trim();
+  console.log('用户发送的消息: ' + userMessageTemp)
 
   // 请求对话新建接口
-  newChat(userMessage.value).then(res => {
+  newChat(userMessageTemp).then(res => {
     if (res.data.success) {
         // 跳转到聊天对话页面
         router.push({
-          path: '/chat/' + res.data.data.uuid
-        });
+          name: 'ChatPage', // 必须使用命名路由来跳转
+          params: {
+            chatId: res.data.data.uuid // Url 中的 UUID
+          },
+          state: {
+            firstMessage: userMessageTemp // 将用户在首页填入的消息，传递给 “聊天对话页”
+          }
+        })
     }
   })
 }

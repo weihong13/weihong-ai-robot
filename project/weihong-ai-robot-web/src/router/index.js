@@ -4,6 +4,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 const routes = [
     {
         path: '/', // 路由地址
+        name: 'Index', // 命名路由
         component: () => import('@/views/Index.vue'), // 对应组件
         meta: { // meta 信息
             title: '小宏 AI 机器人首页' // 页面标题
@@ -11,6 +12,7 @@ const routes = [
     },
     {
         path: '/chat/:chatId', // 路由地址
+        name: 'ChatPage', // 命名路由
         component: () => import('@/views/ChatPage.vue'), // 对应组件
         meta: { // meta 信息
             title: '对话聊天页' // 页面标题

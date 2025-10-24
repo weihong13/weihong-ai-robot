@@ -1,8 +1,10 @@
 <template>
+  <div :class="containerClass">
     <div class="bg-gray-100 rounded-3xl px-4 py-3 mx-4 border border-gray-200 flex flex-col">
         <textarea placeholder="给小宏 AI 机器人发送消息"
             class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" rows="2"
             v-model="userMessage"
+            @input="autoResize"
             ref="textareaRef"></textarea>
 
         
@@ -50,17 +52,19 @@
                     disabled:opacity-50
                     disabled:cursor-not-allowed"
                     @click="handleSendMessage"
+                    :disabled="!userMessage.trim()"
                     >
                 <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
             </button>
         </div>
     </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
-import { message } from 'ant-design-vue'   
+import { message } from 'ant-design-vue'
 
 // 接收父组件传递的属性
 const props = defineProps({
@@ -69,23 +73,14 @@ const props = defineProps({
     type: String,
     required: true
   },
+  containerClass: { // 自定义根容器样式
+    type: String,
+    default: ''
+  },
 })
 
 // 定义 emits
 const emit = defineEmits(['update:modelValue', 'sendMessage'])
-
-// 处理发送消息
-const handleSendMessage = () => {
-  // 若消息为空
-  if (!userMessage.value.trim()) {
-    message.warning('消息不能为空');
-    return
-  }
-
-  emit('sendMessage');
-  // 清空输入框
-  userMessage.value = '';
-}
 
 // 计算属性，用于 v-model 的双向绑定
 const userMessage = computed({
@@ -156,5 +151,37 @@ const isNetworkSearchSelected = ref(false)
 // 切换联网搜索选中状态
 const toggleNetworkSearch = () => {
     isNetworkSearchSelected.value = !isNetworkSearchSelected.value;
+}
+
+// 处理发送消息
+const handleSendMessage = () => {
+  // 若消息为空
+  if (!userMessage.value.trim()) {
+    message.warning('消息不能为空');
+    return
+  }
+
+  emit('sendMessage');
+  // 清空输入框
+  userMessage.value = '';
+}
+
+// 文本域引用
+const textareaRef = ref(null)
+
+// 自动调整文本域高度
+const autoResize = () => {
+  const textarea = textareaRef.value;
+  if (textarea) {
+    // 重置高度以获取正确的滚动高度
+    textarea.style.height = 'auto'
+    
+    // 计算新高度，但最大不超过 300px
+    const newHeight = Math.min(textarea.scrollHeight, 300);
+    textarea.style.height = newHeight + 'px';
+    
+    // 如果内容超出 300px，则启用滚动
+    textarea.style.overflowY = textarea.scrollHeight > 300 ? 'auto' : 'hidden';
+  }
 }
 </script>
