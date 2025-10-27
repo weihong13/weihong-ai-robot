@@ -15,7 +15,7 @@
                 <div class="border border-gray-300 px-2 py-1 rounded-3xl flex items-center justify-center hover:bg-gray-200 cursor-pointer"
                 ref="selectRef"
                 @click="toggleModelDropdown">
-                    <SvgIcon name="deepseek-logo" customCss="w-5 h-5 mr-1.5" />
+                <SvgIcon :name="currSelectedModel.icon" customCss="w-5 h-5 mr-1.5" />
                     <span class="text-gray-800 text-xs">{{ currSelectedModel.name }}</span>
                     <SvgIcon name="down-arrow" customCss="w-5 h-5 ml-1 text-gray-800 transform transition-transform duration-300"
                     :class="isModelDropdownOpen ? 'rotate-180' : ''" />
@@ -65,6 +65,8 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { message } from 'ant-design-vue'
+// 导入Pinia store
+import { useChatStore } from '@/stores/chatStore'
 
 // 接收父组件传递的属性
 const props = defineProps({
@@ -92,11 +94,13 @@ const userMessage = computed({
   }
 })
 
+// 获取 chat store
+const chatStore = useChatStore()
+
 // 模型列表
-const models = ref([
-  { id: 1, name: 'deepseek-v3', icon: 'deepseek-logo', description: "更流畅", selected: true },
-  { id: 2, name: 'deepseek-r1', icon: 'deepseek-logo', description: "深度思考", selected: false },
-]);
+const models = computed(() => chatStore.models)
+
+
 
 // 下拉菜单状态
 const isModelDropdownOpen = ref(false)
@@ -125,32 +129,26 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
-// 当前选择的模型，默认为第一个 deepseek-v3
-const currSelectedModel = ref(models.value[0])
+
+// 当前选择的模型，使用 store 中的选中模型
+const currSelectedModel = computed(() => chatStore.selectedModel)
 
 // 选择模型
 const selectModel = (model) => {
-  // 将所有模型的 selected 置为 false
-  models.value.forEach(m => {
-    m.selected = false;
-  });
-  
-  // 将选中模型的 selected 置为 true
-  model.selected = true;
-  
-  // 更新当前选中的模型
-  currSelectedModel.value = model;
+  // 更新 store 中的选中模型
+  chatStore.updateSelectedModel(model);
   
   // 关闭下拉菜单
   isModelDropdownOpen.value = false;
 }
 
-// 是否启用联网搜索
-const isNetworkSearchSelected = ref(false)
+// 是否启用联网搜索，使用 store 中的状态
+const isNetworkSearchSelected = computed(() => chatStore.isNetworkSearchSelected)
 
 // 切换联网搜索选中状态
 const toggleNetworkSearch = () => {
-    isNetworkSearchSelected.value = !isNetworkSearchSelected.value;
+  // 更新 store 中的联网搜索状态
+  chatStore.updateNetworkSearchStatus(!chatStore.isNetworkSearchSelected)
 }
 
 // 处理发送消息
@@ -161,7 +159,10 @@ const handleSendMessage = () => {
     return
   }
 
-  emit('sendMessage');
+  emit('sendMessage', {
+    selectedModel: chatStore.selectedModel,
+    isNetworkSearch: chatStore.isNetworkSearchSelected
+  });
   // 清空输入框
   userMessage.value = '';
 }
