@@ -47,6 +47,8 @@ import Layout from '@/layouts/Layout.vue'
 import ChatInputBox from '@/components/ChatInputBox.vue'
 import LoadingDots from '@/components/LoadingDots.vue'
 
+import { findChatMessagePageList } from '@/api/chat'
+
 import { useRoute } from 'vue-router'
 // 导入Pinia store
 import { useChatStore } from '@/stores/chatStore'
@@ -66,12 +68,19 @@ const message = ref(history.state?.firstMessage || '')
 const chatContainer = ref(null)
 
 // 聊天记录 (给个默认的问候语)
-const chatList = ref([
-  { role: 'assistant', content: '我是小宏智能 AI 助手！✨ 我可以帮你解答各种问题，无论是学习、工作，还是日常生活中的小困惑，都可以找我聊聊。有什么我可以帮你的吗？😊' }
-])
+const chatList = ref([])
 
 onMounted(() => {
+  // 加载历史消息
+  loadHistoryMessages()
   const firstMessage = history.state?.firstMessage
+
+  // 为聊天容器添加滚动事件监听器
+  if (chatContainer.value) {
+    // 添加监听事件
+    chatContainer.value.addEventListener('scroll', handleScroll);
+  }
+
   // 检查跳转路由时，是否有初始消息
   if (firstMessage) {
     message.value = firstMessage
@@ -80,7 +89,15 @@ onMounted(() => {
       selectedModel: chatStore.selectedModel,
       isNetworkSearch: chatStore.isNetworkSearchSelected
     })
+
+    // 发送消息后清除 history.state 中的 firstMessage，防止刷新页面时重复发送
+    if (history.replaceState) {
+        const newState = { ...history.state }
+        delete newState.firstMessage
+        history.replaceState(newState, document.title)
+    }
   }
+  
 })
 
 // SSE 连接
@@ -170,6 +187,45 @@ chatList.value.push({ role: 'assistant', content: '', loading: true})
 
 }
 
+
+// 分页相关状态
+// 当前页码（默认第一页）
+const current = ref(1)
+// 每页展示数据量
+const size = ref(10)
+// 是否还有下一页数据（默认有）
+const hasMore = ref(true)
+// 是否正在加载中 (解决并发请求后续页数据问题)
+const isLoadingMore = ref(false)
+
+// 加载历史对话消息
+const loadHistoryMessages = async () => {
+  findChatMessagePageList(current.value, size.value, chatId.value).then((res) => {
+      // 无论成功失败，请求完成后都需要重置加载状态
+      isLoadingMore.value = false
+
+      if (res.data.success) {
+        const historyMessages = res.data.data
+        // 判断是否还有下一页
+        hasMore.value = res.data.pages > current.value
+        if (historyMessages && historyMessages.length > 0) {
+          // 将历史消息添加到聊天列表顶部
+          chatList.value = [...historyMessages, ...chatList.value]
+          
+       	  // 确保加载历史消息时自动滚动到底部（仅第一页）
+          if (current.value === 1) {
+              // 滚动到最底部
+              scrollToBottom()
+          }
+        }
+      }
+  }).catch((error) => {
+      // 错误处理，重置加载状态
+      console.error('加载历史消息失败:', error)
+      isLoadingMore.value = false
+  })
+}
+
 // 滚动到底部
 const scrollToBottom = async () => {
   await nextTick() // 等待 Vue.js 完成 DOM 更新
@@ -177,6 +233,67 @@ const scrollToBottom = async () => {
     // 将容器的滚动条位置设置到最底部
     const container = chatContainer.value;
     container.scrollTop = container.scrollHeight;
+  }
+}
+
+// 监听滚动事件
+const handleScroll = () => {
+  if (chatContainer.value) {
+    // 到滚动区域顶部的距离
+    const scrollTop = chatContainer.value.scrollTop
+    // 滚动区域完整高度
+    const scrollHeight = chatContainer.value.scrollHeight
+    
+    // 打印滚动过程中的详细日志
+    console.log('=== 滚动事件日志 ===')
+    console.log('scrollTop:', scrollTop)
+    console.log('scrollHeight:', scrollHeight)
+    console.log('isLoadingMore:', isLoadingMore.value)
+    console.log('hasMore:', hasMore.value)
+
+    // 当用户向上滚动到顶部附近，且有更多数据，且当前没有在加载中时，才加载更多历史消息
+    if (scrollTop < 50  && hasMore.value && !isLoadingMore.value) {
+      console.log('=== 触发加载更多历史消息 ===');
+      loadMoreHistoryMessages();
+    }
+  }
+}
+
+
+// 加载更多历史消息
+const loadMoreHistoryMessages = async () => {
+  console.log('=== 开始加载更多历史消息 ===')
+  console.log('当前页码:', current.value)
+  
+  // 双重检查：
+  // 1. 如果当前页面已经是最后一页，则不再发送请求
+  // 2. 如果已经有请求在进行中，则不再发送请求
+  if (!hasMore.value) {
+    console.log('=== 没有更多历史消息，不再请求 ===')
+    return
+  }
+  
+  if (isLoadingMore.value) {
+    console.log('=== 已有加载请求正在进行中，不再发送新请求 ===')
+    return
+  }
+  // 设置加载状态为 true，防止并发请求
+  isLoadingMore.value = true
+
+  // 计算下一页页码（向上滑动加载更早的历史消息，页码应该增加）
+  const nextPageNo = current.value + 1
+  console.log('=== 计算下一页页码 ===', nextPageNo)
+  
+  // 保存当前页码用于错误恢复
+  const currentTemp = current.value
+  // 当前需要请求的页码
+  current.value = nextPageNo
+  
+  try {
+    await loadHistoryMessages();
+  } catch (error) {
+    // 恢复页码
+    current.value = currentTemp;
   }
 }
 
@@ -191,6 +308,10 @@ const closeSSE = () => {
 // 组件卸载时自动关闭连接
 onBeforeUnmount(() => {
   closeSSE()
+  // 移除滚动事件监听
+  if (chatContainer.value) {
+    chatContainer.value.removeEventListener('scroll', handleScroll);
+  }
 })
 </script>
 
