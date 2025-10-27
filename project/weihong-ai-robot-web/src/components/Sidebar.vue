@@ -11,7 +11,6 @@
               <span class="text-2xl font-bold font-sans tracking-wide text-gray-800">小宏AI机器人</span>
             </div>
 
-
             <!-- 开启新对话按钮 -->
             <button @click="jumpToIndexPage"
               class="mx-auto mb-[34px] my-2 px-6 py-2 text-white rounded-xl transition-colors new-chat-btn w-fit cursor-pointer">
@@ -27,13 +26,14 @@
                 @mouseenter="showButton = historyChat.uuid" @mouseleave="showButton = null">
 
                     <a-tooltip placement="top">
-                        <!-- Tooltip 提示文字 -->
-                        <template #title>
-                            <span>{{ historyChat.summary }}</span>
-                        </template>
+                            <!-- Tooltip 提示文字 -->
+                            <template #title>
+                              <span>{{ historyChat.summary }}</span>
+                            </template>
 
-                        <p class="text-[14px] text-gray-800 overflow-hidden whitespace-nowrap">{{ historyChat.summary }}</p>
+                            <p class="text-[14px] text-gray-800 overflow-hidden whitespace-nowrap">{{ historyChat.summary }}</p>
                     </a-tooltip>
+                    
                     <!-- 下拉菜单 -->
                     <a-dropdown>
                          <template #overlay>
@@ -90,11 +90,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// 跳转到首页
-const jumpToIndexPage = () => {
-  router.push('/')
-}
-
 // 定义 props, 对外部暴露配置项
 const props = defineProps({
   sidebarOpen: { type: Boolean, required: true }, // 左边栏是否展开
@@ -110,7 +105,7 @@ const toggleSidebar = () => {
 
 // 历史对话
 const historyChats = ref([
-  {"uuid": "9640a419-4b0c-45dd-b16d-1980df2424c4", "summary": "新对话1新对话1新对话1新对话1新对话1新对话1"},
+  {"uuid": "9640a419-4b0c-45dd-b16d-1980df2424c4", "summary": "很长很长很长很长很长很长很长很长很长的新对话1"},
   {"uuid": "7c2af48e-dce2-4822-aef6-c7a3c1949805", "summary": "新对话2"},
   {"uuid": "152496bc-2776-422d-ac96-5dbfc903bc1d", "summary": "新对话3"},
 ])
@@ -118,6 +113,10 @@ const historyChats = ref([
 // 当前显示右侧栏按钮的聊天 ID
 const showButton = ref(null)
 
+// 跳转到首页
+const jumpToIndexPage = () => {
+  router.push('/')
+}
 </script>
 
 <style scoped>

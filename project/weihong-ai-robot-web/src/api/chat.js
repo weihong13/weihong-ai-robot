@@ -4,4 +4,3 @@ import axios from "@/axios";
 export function newChat(message) {
     return axios.post("/chat/new", {message})
 }
-

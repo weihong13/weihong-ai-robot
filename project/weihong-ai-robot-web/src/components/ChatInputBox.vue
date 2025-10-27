@@ -10,19 +10,23 @@
         
         <!-- 下方容器 -->
         <div class="flex mt-3">
-            <div class="flex gap-2 relative">
+            <!-- 左侧 -->
+            <div class="flex gap-2 relative" ref="leftContainerRef">
                 <!-- 大模型下拉框 -->
                 <div class="border border-gray-300 px-2 py-1 rounded-3xl flex items-center justify-center hover:bg-gray-200 cursor-pointer"
                 ref="selectRef"
                 @click="toggleModelDropdown">
-                <SvgIcon :name="currSelectedModel.icon" customCss="w-5 h-5 mr-1.5" />
+                    <SvgIcon :name="currSelectedModel.icon" customCss="w-5 h-5 mr-1.5" />
                     <span class="text-gray-800 text-xs">{{ currSelectedModel.name }}</span>
                     <SvgIcon name="down-arrow" customCss="w-5 h-5 ml-1 text-gray-800 transform transition-transform duration-300"
                     :class="isModelDropdownOpen ? 'rotate-180' : ''" />
                 </div>
 
                 <!-- 下拉框菜单 -->
-                <div v-if="isModelDropdownOpen" class="absolute top-8 left-0 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 overflow-hidden">
+                <div v-if="isModelDropdownOpen" 
+                ref="dropdownRef"
+                :class="['absolute', 'left-0', 'w-48', 'bg-white', 'rounded-lg', 'shadow-lg', 'border', 'border-gray-200', 'z-10', 'overflow-hidden', dropdownPosition]"
+                >
                     <div v-for="model in models" :key="model.id" 
                     class="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
                     @click="selectModel(model)">
@@ -62,11 +66,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { message } from 'ant-design-vue'
 // 导入Pinia store
 import { useChatStore } from '@/stores/chatStore'
+
+// 获取 chat store
+const chatStore = useChatStore()
 
 // 接收父组件传递的属性
 const props = defineProps({
@@ -94,22 +101,45 @@ const userMessage = computed({
   }
 })
 
-// 获取 chat store
-const chatStore = useChatStore()
-
 // 模型列表
 const models = computed(() => chatStore.models)
-
-
 
 // 下拉菜单状态
 const isModelDropdownOpen = ref(false)
 // 下拉框容器引用
 const selectRef = ref(null)
 
+
+// 下拉菜单容器引用
+const leftContainerRef = ref(null);
+
+// 下拉菜单引用
+const dropdownRef = ref(null)
+// 下拉菜单位置
+const dropdownPosition = ref('top-8') // 默认下方
+
 // 下拉菜单显示/隐藏
 const toggleModelDropdown = (event) => {
   isModelDropdownOpen.value = !isModelDropdownOpen.value
+
+  // 如果下拉菜单显示，则计算位置
+  if (isModelDropdownOpen.value) {
+    nextTick(() => {
+      if (leftContainerRef.value && dropdownRef.value) {
+        const buttonRect = leftContainerRef.value.getBoundingClientRect();
+        const dropdownHeight = dropdownRef.value.offsetHeight;
+        
+        // 检查下方空间是否足够
+        if (window.innerHeight - buttonRect.bottom < dropdownHeight) {
+          // 下方空间不足，显示在上方
+          dropdownPosition.value = 'bottom-10';
+        } else {
+          // 下方空间足够，显示在下方
+          dropdownPosition.value = 'top-8';
+        }
+      }
+    })
+  }
 }
 
 // 点击外部区域关闭下拉菜单
@@ -128,7 +158,6 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
-
 
 // 当前选择的模型，使用 store 中的选中模型
 const currSelectedModel = computed(() => chatStore.selectedModel)

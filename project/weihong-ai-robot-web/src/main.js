@@ -11,11 +11,12 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const app = createApp(App)
+
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
-// 应用路由
-app.use(router)
+
 // 应用 Pinia
 app.use(pinia)
-
+// 应用路由
+app.use(router)
 app.mount('#app')
