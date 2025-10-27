@@ -24,6 +24,7 @@
               </div>
               <!-- 回复的内容 -->
               <div class="p-1 mb-2 max-w-[90%]">
+                <LoadingDots v-if="chat.loading" />
                 <StreamMarkdownRender :content="chat.content" />
               </div>
             </div>
@@ -44,6 +45,8 @@ import SvgIcon from '@/components/SvgIcon.vue'
 import StreamMarkdownRender from '@/components/StreamMarkdownRender.vue'
 import Layout from '@/layouts/Layout.vue'
 import ChatInputBox from '@/components/ChatInputBox.vue'
+import LoadingDots from '@/components/LoadingDots.vue'
+
 import { useRoute } from 'vue-router'
 // 导入Pinia store
 import { useChatStore } from '@/stores/chatStore'
@@ -101,8 +104,8 @@ const sendMessage = async (payload) => {
   // 点击发送按钮后，清空输入框
   message.value = ''
 
-  // 添加一个占位的回复消息
-  chatList.value.push({ role: 'assistant', content: ''})
+// 添加一个占位的回复消息，Loading 加载状态为 true
+chatList.value.push({ role: 'assistant', content: '', loading: true})
 
   try {
     // 构建请求体
@@ -130,6 +133,10 @@ const sendMessage = async (payload) => {
       body: JSON.stringify(requestBody),
       onmessage(msg) {
         if (msg.event === '') {
+          // 收到第一条数据后设置 loading 为 false
+          if (lastMessage.loading) {
+              lastMessage.loading = false;
+          }
           // 解析 JSON
           let parseJson = JSON.parse(msg.data)
           // 持续追加流式回答
@@ -154,7 +161,9 @@ const sendMessage = async (payload) => {
   } catch (error) {
     console.error('发送消息错误: ', error)
     // 提示用户 “请求出错”
-    chatList.value[chatList.value.length - 1].content = '抱歉，请求出错了，请稍后重试。'
+    const lastMessage = chatList.value[chatList.value.length - 1]
+    lastMessage.content = '抱歉，请求出错了，请稍后重试。'
+    lastMessage.loading = false
     // 滚动到底部
     scrollToBottom()
   }

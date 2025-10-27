@@ -5,6 +5,7 @@
             class="bg-transparent border-none outline-none w-full text-sm resize-none min-h-[24px]" rows="2"
             v-model="userMessage"
             @input="autoResize"
+            @keydown.enter="handleEnter"
             ref="textareaRef"></textarea>
 
         
@@ -51,15 +52,22 @@
             </div>
             <div class="grow"></div>
 
-            <!-- 发送按钮 -->
-            <button class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors
-                    disabled:opacity-50
-                    disabled:cursor-not-allowed"
-                    @click="handleSendMessage"
-                    :disabled="!userMessage.trim()"
-                    >
-                <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
-            </button>
+            <a-tooltip placement="top">
+                <!-- Tooltip 提示文字 -->
+                <template #title>
+                  <span>请输入你的问题</span>
+                </template>
+
+                <!-- 发送按钮 -->
+                <button class="flex items-center justify-center bg-[#4d6bfe] rounded-full w-8 h-8 border border-[#4d6bfe] hover:bg-[#3b5bef] transition-colors
+                        disabled:opacity-50
+                        disabled:cursor-not-allowed"
+                        @click="handleSendMessage"
+                        :disabled="!userMessage.trim()"
+                        >
+                    <SvgIcon name="up-arrow" customCss="w-5 h-5 text-white"></SvgIcon>
+                </button>
+            </a-tooltip>
         </div>
     </div>
   </div>
@@ -87,6 +95,13 @@ const props = defineProps({
     default: ''
   },
 })
+
+// 监听 textarea 回车事件
+const handleEnter = (event) => {
+  console.log('回车键被按下', event.target.value)
+  // 主动调用发送消息方法
+  handleSendMessage()
+}
 
 // 定义 emits
 const emit = defineEmits(['update:modelValue', 'sendMessage'])
